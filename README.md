@@ -28,4 +28,4 @@ Run `main.py` in your preferred Python environment.
 > This project was created as a practical exercise to bring together concepts from my Python Fundamentals learning series.
 ## Related Article
 
-Read the full walkthrough of the project: [Student Results Management System] (https://dev.to/sharonnyabuto/building-a-student-results-management-system-with-python-163o)
+[Student Result Management System](https://dev.to/sharonnyabuto/building-a-student-results-management-system-with-python-163o)
