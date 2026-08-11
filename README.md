@@ -12,7 +12,7 @@ A simple Python-based student results management system built to bring together 
 
 ## Project Structure
 
-- `main.ipynb` - Runs the application and handles user interaction
+- `main.py` - Runs the application and handles user interaction
 - `logic.py` - Calculates averages and grades
 - `file_handler.py` - Saves and loads student records
 - `report.py` - Generates the performance report
