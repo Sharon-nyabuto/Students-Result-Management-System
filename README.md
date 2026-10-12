@@ -29,3 +29,7 @@ Run `main.py` in your preferred Python environment.
 ## Related Article
 
 [Student Result Management System](https://dev.to/sharonnyabuto/building-a-student-results-management-system-with-python-163o)
+
+## Web version
+
+A web version of this system with logins, a dashboard, PDF report cards and CSV import is in the web folder. Live demo:
