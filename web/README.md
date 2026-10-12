@@ -6,6 +6,10 @@ A web app for recording student marks, calculating averages and grades, ranking 
 
 ## What it does
 
+- Separate Student, Teacher and Admin logins on a centred sign-in page, with the demo credentials shown as placeholders
+- Students can raise an issue (for example a missing mark); the admin sees it under **Issues** and can reply and resolve it
+- Edits and imports confirm with a success message
+- Charts are static, so scrolling over them never rescales them
 - Three roles: **admin** (everything, plus CSV import, delete and PIN resets), **teacher** (view, add and edit marks) and **student** (view only)
 - Students sign in with their student ID and a personal PIN, and see only their own marks next to the class average for each subject, with their position in class and a PDF report card. PINs are stored hashed; new students get a random 6-digit PIN that the admin sees once
 - Dashboard: class average, pass rate, top student, average by subject, grade distribution
@@ -17,7 +21,10 @@ A web app for recording student marks, calculating averages and grades, ranking 
 
 ## Grading
 
-Average of the six subjects: A 80+, B 70-79, C 60-69, D 50-59, E below 50.
+Average of the six subjects (and each subject mark): A 80+, B 70-79, C 60-69, D 50-59, E 40-49, F below 40.
+
+- **Remedial:** any subject below 50 is flagged, for students, teachers and on the PDF report card.
+- **Repeats the class:** an overall average below 40 (grade F). Both thresholds are constants at the top of `logic.py`.
 
 ## Run it
 
@@ -40,7 +47,4 @@ To change them, set `SRMS_ADMIN_PASSWORD` and `SRMS_TEACHER_PASSWORD` before sta
 
 ## Limits
 
-- Staff use two shared demo accounts; only students have individual logins
-- Student PINs are a light check, not strong security: login is locked after 5 failed tries per visit, but there is no password recovery or per-IP limit
-- Free hosting tiers may reset the database, which is fine for a demo but not for real records
-- Real student data needs proper accounts, backups and a data protection plan before use
+- Free hosting tiers such as streamlit may reset the database, which is fine for a demo but not for real records. So when working with actual data you'll need proper accounts, backups and a data protection plan before use.

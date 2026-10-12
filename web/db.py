@@ -1,6 +1,7 @@
 """SQLite storage for students and marks."""
 import os
 import random
+from datetime import datetime, timezone
 import sqlite3
 
 import hmac
@@ -38,6 +39,15 @@ def init_db():
                 mark REAL NOT NULL CHECK (mark >= 0 AND mark <= 100),
                 PRIMARY KEY (student_id, subject)
             );
+            CREATE TABLE IF NOT EXISTS issues (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+                message TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'Open',
+                reply TEXT,
+                created_at TEXT NOT NULL,
+                resolved_at TEXT
+            );
             """
         )
         cols = [r["name"] for r in conn.execute("PRAGMA table_info(students)")]
@@ -50,6 +60,61 @@ def init_db():
     with connect() as conn:  # demo students from older databases get the demo PIN
         for r in conn.execute("SELECT id FROM students WHERE pin_hash IS NULL AND adm_no LIKE 'DEMO-%'").fetchall():
             _set_pin(conn, r["id"], DEMO_PIN)
+    _seed_sample_issues()
+
+
+def _now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+
+
+MAX_OPEN_ISSUES = 3
+
+
+def add_issue(student_id, message):
+    """A student raises an issue (for example a missing mark). Raises ValueError on bad input."""
+    message = (message or "").strip()
+    if len(message) < 5:
+        raise ValueError("Please describe the issue in a few words.")
+    if len(message) > 500:
+        raise ValueError("Please keep it under 500 characters.")
+    with connect() as conn:
+        open_count = conn.execute("SELECT COUNT(*) FROM issues WHERE student_id = ? AND status = 'Open'",
+                                  (student_id,)).fetchone()[0]
+        if open_count >= MAX_OPEN_ISSUES:
+            raise ValueError("You already have 3 open issues. Please wait for the admin to respond.")
+        conn.execute("INSERT INTO issues (student_id, message, created_at) VALUES (?, ?, ?)",
+                     (student_id, message, _now()))
+
+
+def load_issues(status=None, student_id=None):
+    """Issues newest first, with the student's name and admission number."""
+    sql = ("SELECT i.id, i.student_id, s.adm_no, s.name, s.class_name, i.message, i.status, i.reply, "
+           "i.created_at, i.resolved_at FROM issues i JOIN students s ON s.id = i.student_id WHERE 1=1")
+    args = []
+    if status:
+        sql += " AND i.status = ?"
+        args.append(status)
+    if student_id:
+        sql += " AND i.student_id = ?"
+        args.append(student_id)
+    with connect() as conn:
+        return [dict(r) for r in conn.execute(sql + " ORDER BY i.id DESC", args)]
+
+
+def resolve_issue(issue_id, reply=""):
+    with connect() as conn:
+        conn.execute("UPDATE issues SET status = 'Resolved', reply = ?, resolved_at = ? WHERE id = ?",
+                     ((reply or "").strip() or None, _now(), issue_id))
+
+
+def _seed_sample_issues():
+    with connect() as conn:
+        if conn.execute("SELECT COUNT(*) FROM issues").fetchone()[0]:
+            return
+        ids = {r["adm_no"]: r["id"] for r in conn.execute("SELECT id, adm_no FROM students")}
+    if "DEMO-004" in ids and "DEMO-011" in ids:
+        add_issue(ids["DEMO-004"], "My Kiswahili mark looks too low. I think my second paper was not added.")
+        add_issue(ids["DEMO-011"], "There is no History mark for me on my results.")
 
 
 def _set_pin(conn, student_id, pin):

@@ -19,3 +19,12 @@ def test_validate_mark():
         validate_mark(101)
     with pytest.raises(ValueError):
         validate_mark(-1)
+
+
+def test_fail_remedial_and_outcome():
+    from logic import outcome, remedial_subjects
+    assert grade_for(40) == "E" and grade_for(39.9) == "F"
+    weak = {s: 70 for s in SUBJECTS} | {"Physics": 45}
+    assert remedial_subjects(weak) == ["Physics"] and outcome(weak) == "Promoted, remedial needed"
+    assert outcome({s: 35 for s in SUBJECTS}) == "Repeats class"
+    assert outcome({s: 70 for s in SUBJECTS}) == "Promoted"

@@ -47,3 +47,22 @@ def test_duplicate_and_range_rejected():
         db.add_student("DEMO-001", "Dup", "Form 3 East", MARKS)
     with pytest.raises(ValueError):
         db.add_student("X-1", "Bad", "Form 3 East", {**MARKS, "Physics": 120})
+
+
+def test_issues_flow():
+    sid = db.verify_student_pin("DEMO-020", db.DEMO_PIN)
+    db.add_issue(sid, "My English mark is missing.")
+    mine = db.load_issues(student_id=sid)
+    assert mine[0]["status"] == "Open"
+    db.resolve_issue(mine[0]["id"], "Fixed")
+    assert db.load_issues(student_id=sid)[0]["status"] == "Resolved"
+    with pytest.raises(ValueError):
+        db.add_issue(sid, "  ")
+
+
+def test_open_issue_limit():
+    sid = db.verify_student_pin("DEMO-021", db.DEMO_PIN)
+    for _ in range(db.MAX_OPEN_ISSUES):
+        db.add_issue(sid, "Something is wrong.")
+    with pytest.raises(ValueError):
+        db.add_issue(sid, "One more problem.")
