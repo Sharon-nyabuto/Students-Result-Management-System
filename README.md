@@ -32,4 +32,4 @@ Run `main.py` in your preferred Python environment.
 
 ## Web version
 
-A web version of this system with logins, a dashboard, PDF report cards and CSV import is in the web folder : [Live Demo](https://student-results-management.streamlit.app/)
+A web version of this system with logins, a dashboard, PDF report cards and CSV import is in the web folder : [Live Demo](https://students-result-system.streamlit.app/)
