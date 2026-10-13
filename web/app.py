@@ -224,18 +224,21 @@ def page_dashboard():
 
     left, right = st.columns(2)
     with left:
-        st.subheader("Top 10 students")
-        st.dataframe(table.head(10)[["Rank", "Name", "Class", "Average", "Grade"]], hide_index=True, width="stretch")
+        st.subheader("Top 5 students")
+        st.dataframe(table.head(5)[["Rank", "Name", "Class", "Average", "Grade"]],
+                     hide_index=True, width="stretch")
     with right:
         st.subheader("Needs attention")
-        attention = table[table["Outcome"] != "Promoted"].sort_values("Average")
+        st.caption("Average below 60 (grade D, E or F), lowest first.")
+        rest = table.iloc[5:]                      # never repeat anyone from the top 5
+        attention = rest[rest["Average"] < 60].sort_values("Average")
         if attention.empty:
-            st.info("No students need remedial work or repeat the class.")
+            st.info("No student has an average below 60.")
         else:
-            st.dataframe(attention[["Name", "Average", "Outcome"]].head(10),
+            st.dataframe(attention.head(5)[["Name", "Class", "Average", "Grade"]],
                          hide_index=True, width="stretch")
-            if len(attention) > 10:
-                st.caption(f"Showing the lowest 10 of {len(attention)}. The full list is in Class report.")
+            if len(attention) > 5:
+                st.caption(f"Showing the lowest 5 of {len(attention)}. The full list is in Class report.")
 
     left, right = st.columns(2)
     with left:
@@ -442,6 +445,4 @@ def main():
     nav = st.navigation(pages, position="top")
     header_bar(role)
     nav.run()
-
-
 main()
